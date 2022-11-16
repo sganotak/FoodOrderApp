@@ -1,0 +1,69 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+<head><link rel="stylesheet" href="/styles.css"></head>
+
+<body>
+  <%- include("./partials/nav.ejs") %>
+
+  
+
+  <div class="order-index">
+    <h2>All Orders</h2>
+
+    <% 
+    if (orders.length > 0) { 
+       orders.forEach(order => { %>
+       <a class="single" href="/controlpanel/vieworder/<%= order._id %>">
+        <p class="orderid"></p>Order ID: <%= order._id %></p>
+        <p class="timestamp"><%= order.createdAt %> </p>
+        <p class="status"><%= order.status %> </p>
+      </a>
+
+      <% }) %>
+    <% } else { %>
+      <p>There are no orders...</p>
+    <% } %>
+
+
+      <a class="addproduct">
+          <img src= "/create.svg" alt="create icon" >
+          <span class="tooltiptext">Create Product</span>
+        </a>
+    
+        <a class="edit">
+            <img src= "/pencil-box.svg" alt="edit icon" >
+            <span class="tooltiptext">Edit Menu</span>
+          </a>
+
+
+    
+    
+    
+  </div>
+
+  
+  <script> const addproductbtn = document.querySelector('a.addproduct');
+      addproductbtn.addEventListener('click', (e) => {
+        const endpoint = '/controlpanel/create';
+        fetch(endpoint, {
+          method: 'GET',
+        })
+        .then(response => response)
+        .then(data => window.location.href = data.url)
+        .catch(err => console.log(err));
+      });
+
+      const editbtn = document.querySelector('a.edit');
+      editbtn.addEventListener('click', (e) => {
+        const endpoint = '/controlpanel/editmenu';
+        fetch(endpoint, {
+          method: 'GET',
+        })
+        .then(response => response)
+        .then(data => window.location.href = data.url)
+        .catch(err => console.log(err));
+      });
+    </script>
+  <%- include("./partials/footer.ejs") %>
+</body>
+</html>

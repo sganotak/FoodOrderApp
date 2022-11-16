@@ -1,0 +1,53 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+<head><link rel="stylesheet" href="/styles.css"></head>
+<body>
+  <%- include("./partials/nav.ejs") %>
+
+  <div class="details content">
+    <h2>Product Id: <%= product._id %></h2>
+
+    <form action="/controlpanel/editmenu/editproduct/<%=product._id%>" method="POST">
+      <input type='hidden' name='productid' value=<%= product._id %>>
+      <label for="productname">Product Name:</label>
+      <input type="text" name="productname" required value="<%=product.name%>"><br><br>
+      <label for="productcategory">Product Category:</label>
+      <select name="productcategory" id="productcategory" selected="<%=product.category%>">
+          <option value="Appetizers">Appetizers</option>
+          <option value="Main Dishes">Main Dishes</option>
+          <option value="Desserts">Desserts</option>
+          <option value="Drinks">Drinks</option>
+        </select><br><br>
+      <label for="productprice">Price:</label>
+      <input type="number" id="productprice" name="productprice" min="0" step="0.1" value="<%=product.price%>" required><br><br>
+      <button class="editproductbtn">Submit</button><br>
+    </form>
+
+    <a class="delete" data-doc="<%= product._id %>">
+      <img src= "/trashcan.svg" alt="delete icon" >
+      <span class="tooltiptext">Delete Product</span>
+    </a>
+    
+
+  </div>
+
+  <script>
+    const trashcan = document.querySelector('a.delete');
+    trashcan.addEventListener('click', (e) => {
+      const endpoint = `/controlpanel/delete/${trashcan.dataset.doc}`;
+      fetch(endpoint, {
+        method: 'DELETE',
+      })
+      .then(response => response.json())
+      .then(data => window.location.href = data.redirect)
+      .catch(err => console.log(err));
+    });
+
+    </script>
+
+  <%- include("./partials/footer.ejs") %>
+
+ 
+  
+</body>
+</html>

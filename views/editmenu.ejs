@@ -1,0 +1,52 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+<head><link rel="stylesheet" href="/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+  <%- include("./partials/nav.ejs") %>
+
+
+  <div class="new-order content">
+    <h1><center>Edit Menu</center></h1>
+    <% 
+    if (products.length > 0) { 
+       products.forEach(product => { %>
+        <h3 class='menucategories'> <%= product._id %></h3>
+        <% for (const [key, value] of Object.entries(product.totalProducts)) { %>
+       
+          <p class="menuitemname"> <a class="menuitem" href="/controlpanel/editmenu/editproduct/<%= value._id %>"><%= value.name %></a></p>
+          <input type='hidden' name='productId' value=<%- value._id %>>
+      <% } %>
+
+      <% }) %>
+    <% } else { %>
+      <p>There are no products to display...</p>
+    <% } %>
+
+    <button type ='button' class="createproduct">
+        Create New Product
+    </button>
+  </div>
+
+
+
+  <script>
+
+    const addproductbtn = document.querySelector('button.createproduct');
+      addproductbtn.addEventListener('click', (e) => {
+        const endpoint = '/controlpanel/editmenu/create';
+        fetch(endpoint, {
+          method: 'GET',
+        })
+        .then(response => response)
+        .then(data => window.location.href = data.url)
+        .catch(err => console.log(err));
+      });
+   
+
+</script>
+
+  <%- include("./partials/footer.ejs") %>
+</body>
+</html>

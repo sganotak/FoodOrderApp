@@ -1,0 +1,86 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+<head><link rel="stylesheet" href="/styles.css"></head>
+<body>
+  <%- include("./partials/nav.ejs") %>
+
+  <div class="details content">
+    <h2>Order Id: <%= order._id %></h2>
+    <div class="productinfo">
+        <% 
+    if (order.products.length > 0) { 
+       order.products.forEach(product => { %>
+        <p class="product"><%= product.quantity %> x <%= product.productId.name %></p>
+      <% }) %>
+    <% } else { %>
+      <p>There are no products to display...</p>
+    <% } %>
+    <p>Subtotal: <%= order.totalprice %> € </p>
+      </div>
+      <hr>
+    <div class="customerinfo">
+      <p>Customer Name: <%= order.customerName %></p>
+      <p>Address: <%= order.address %></p>
+      <p>Telephone Number: <%= order.telNumber %></p>
+    </div>
+    <div class="buttons">
+    <a class="delete" data-doc="<%= order._id %>">
+      <img src= "/trashcan.svg" alt="delete icon" >
+      <span class="tooltiptext">Delete Order</span>
+    </a>
+ 
+
+    <a class="accept" data-doc="<%= order._id %>">
+        <img src= "/check.svg" alt="check icon" >
+        <span class="tooltiptext">Accept Order</span>
+      </a>
+
+      <a class="cancel" data-doc="<%= order._id %>">
+          <img src= "/cancel.svg" alt="cancel icon" >
+          <span class="tooltiptext">Cancel Order</span>
+        </a>
+
+    </div>
+
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+
+  <script>
+    const trashcan = document.querySelector('a.delete');
+    trashcan.addEventListener('click', (e) => {
+      const endpoint = `/controlpanel/${trashcan.dataset.doc}`;
+      fetch(endpoint, {
+        method: 'DELETE',
+      })
+      .then(response => response.json())
+      .then(data => window.location.href = data.redirect)
+      .catch(err => console.log(err));
+    });
+
+    const check = document.querySelector("a.accept");
+  check.addEventListener('click', (e) => {
+    const endpoint = `/controlpanel/accept/${check.dataset.doc}`;
+    fetch(endpoint, {
+      method: 'PUT',
+    })
+    .then(response => response.json())
+    .then(data => window.location.href = data.redirect)
+    .catch(err => console.log(err));
+  });
+
+  const cancelbtn = document.querySelector("a.cancel");
+  cancelbtn.addEventListener('click', (e) => {
+    const endpoint = `/controlpanel/cancel/${cancelbtn.dataset.doc}`;
+    fetch(endpoint, {
+      method: 'PUT',
+    })
+    .then(response => response.json())
+    .then(data => window.location.href = data.redirect)
+    .catch(err => console.log(err));
+  });
+    
+  </script>
+  
+</body>
+</html>

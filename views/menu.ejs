@@ -1,0 +1,75 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+<head><link rel="stylesheet" href="/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+  <%- include("./partials/nav.ejs") %>
+
+  <select id="currencySelector" autocomplete="off">
+      <option selected="selected" value="eur">EUR</option>
+      <option value="usd">USD</option>
+      <option value="aud">AUD</option>
+      <option value="gbp">GBP</option>
+    </select>
+
+  <div class="new-order content">
+    <h1><center>Menu</center></h1>
+    <form action="/order" method="POST">
+    <% 
+    if (products.length > 0) { 
+       products.forEach(product => { %>
+        <h3 class='menucategories'> <%= product._id %></h3>
+        <% for (const [key, value] of Object.entries(product.totalProducts)) { %>
+          <p class="name"><%= value.name %></p>
+          <input type='hidden' name='productId' value=<%- value._id %>>
+          <input type='hidden' name='price' value=<%- value.price %>>
+          <p class="currency" data-currencyName="eur"><%= value.price %> € </p>
+          <label for="quantity">Quantity:</label>
+           <input type="number" id="quantity"  name="quantity" min="0" step="1" value="0" >
+      <% } %>
+
+      <% }) %>
+    <% } else { %>
+      <p>There are no products to display...</p>
+    <% } %>
+    
+    <p><button type='new-order button'>Submit</button></p>
+  </form>
+  </div>
+
+  <script>
+    var  selector = document.getElementById("currencySelector");
+    var currencyElements = document.getElementsByClassName("currency");
+
+  selector.onchange = function () {
+      var toCurrency = selector.value.toUpperCase();
+      sessionStorage.setItem("prefCurrency", toCurrency);
+      var currencySymbols = JSON.parse('{"EUR": "€","USD":"$","GBP": "£", "AUD": "A$"}');
+         $('.currency').each(function() {
+            var $el = $(this);
+            fromCurrency = $el[0].getAttribute("data-currencyName").toUpperCase();
+  $.ajax({
+    method: 'GET',
+    url: 'https://api.api-ninjas.com/v1/convertcurrency?want='+toCurrency+'&have='+fromCurrency+'&amount='+parseFloat($el[0].innerText),
+    contentType: 'application/json',
+    success: function(result) {
+        
+        //console.log(result);
+        //console.log($el);
+        $el[0].innerHTML = result.new_amount.toString() + "<span> " + currencySymbols[toCurrency.toUpperCase()] + "</span>";
+        $el[0].setAttribute("data-currencyName",toCurrency);
+    },
+    error: function ajaxError(jqXHR) {
+        console.error('Error: ', jqXHR.responseText);
+    }
+});
+});
+      
+  };
+
+</script>
+
+  <%- include("./partials/footer.ejs") %>
+</body>
+</html>

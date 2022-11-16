@@ -1,0 +1,144 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+<head><link rel="stylesheet" href="/styles.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+  <%- include("./partials/nav.ejs") %>
+
+  <div class="about content">
+    <h2>Please Confirm Your Order</h2>
+
+    <div class="productinfo">
+        <% 
+    if (order.products.length > 0) { 
+       order.products.forEach(product => { %>
+        <p class="product"><%= product.quantity %> x <%= product.productId.name %></p>
+      <% }) %>
+    <% } else { %>
+      <p>There are no products to display...</p>
+    <% } %>
+    <p>Subtotal: <span class=subtotal><%= order.totalprice %></span> <span class=currency>€</span> </p>
+      </div>
+      
+    <form class='customerinfoform' action="/order/confirm" method="POST">
+      <input type='hidden' name='orderid' value=<%- order._id %>>
+      <label for="customerName">Your Name:</label><br>
+      <input type="text" id="customerName" name="customerName" required><br>
+      <label for="address">Your Address:</label><br>
+      <input type="text" id="address" name="address" required><br>
+      <label for="telNumber">Your Phone Number:</label><br>
+      <input type="tel" id="telNumber" name="telNumber" required><br>
+      <p><button class="confirmbutton" type='button'>Confirm Order</button></p>
+    </form>
+  </div>
+
+</div>
+<button  type='cancel-order button' class="cancel-order button" data-doc="<%= order._id %>">Cancel Order</button>
+</div>
+
+<div class='orderprocessing'>
+<div class="loader"></div> 
+<p class='loadertext'>Your Order is Processing, Please Wait...</p>
+</div>
+
+
+<script>
+
+    
+    var toCurrency=sessionStorage.prefCurrency;
+    sessionStorage.clear();
+    var currencySymbols = JSON.parse('{"EUR": "€","USD":"$","GBP": "£", "AUD": "A$"}');
+    $('.subtotal').each(function() {
+    var $el= $(this);
+    console.log(toCurrency);
+
+    $.ajax({
+    method: 'GET',
+    url: 'https://api.api-ninjas.com/v1/convertcurrency?want='+toCurrency+'&have=EUR&amount='+$el[0].innerText,
+    contentType: 'application/json',
+    success: function(result) {
+        
+       $el[0].innerText = result.new_amount.toString();
+       $('.currency')[0].innerText=currencySymbols[toCurrency.toUpperCase()]
+        
+    },
+    error: function ajaxError(jqXHR) {
+        console.error('Error: ', jqXHR.responseText);
+    }
+});
+});
+ 
+  
+  $('div.orderprocessing').hide();
+
+
+  const cancelbtn = document.querySelector(".cancel-order");
+  cancelbtn.addEventListener('click', (e) => {
+    const endpoint = `/order/${cancelbtn.dataset.doc}`;
+    fetch(endpoint, {
+      method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(data => window.location.href = data.redirect)
+    .catch(err => console.log(err));
+  });
+
+   const confirmbtn = document.querySelector(".confirmbutton");
+    confirmbtn.addEventListener('click', (e) => {
+
+      $.ajax({
+          method: 'POST',
+          url: 'order/confirm',
+          data: $('.customerinfoform').serialize(),
+          success: function(result) {console.log(result.status)},
+});
+
+        isValid =true;
+      $('.customerinfoform').each(function() {
+
+
+        if ( $(this).find(':input[type!=hidden]').val() === '' )
+          isValid = false;
+        });
+
+   
+        if (isValid) {
+
+          $('div.orderprocessing').show();
+          
+          setInterval(      
+  function() {
+          $.ajax({
+          method: 'GET',
+          url: 'order/<%=order._id%>',
+          success: function(result) {console.log(result.status)
+                if (result.status=='Accepted'){
+                $('div.orderprocessing').hide();
+                window.location.href = '/order/thankyou';
+                }
+
+                if (result.status=='Cancelled'){
+                $('div.orderprocessing').hide();
+                window.location.href = '/order/ordercancelled';
+                }
+          },
+            });
+              },2000);
+          
+          }
+   
+  });
+
+  
+
+ 
+
+ 
+  
+</script>
+
+  <%- include("./partials/footer.ejs") %>
+</body>
+</html>
